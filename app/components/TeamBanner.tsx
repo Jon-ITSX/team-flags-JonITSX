@@ -30,7 +30,12 @@ export default function TeamBanner({ teamNumber, team }: TeamBannerProps) {
         "absolute inset-0 bg-gradient-to-br",
         style.gradient,
         style.pattern
-      )} />
+      )}
+      style={style.backgroundImage ? {
+        backgroundImage: `url(${style.backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      } : undefined} />
 
       {/* Shine effect on hover */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />

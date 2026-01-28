@@ -16,9 +16,9 @@ export function useRequireAuth() {
         process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
       );
 
-      // Redirect to status page if Firebase isn't configured
-      // Otherwise redirect to login
-      router.push(firebaseConfigured ? '/login' : '/status');
+      // Temporarily disable auto-redirect for local UI inspection
+      // (Uncomment the following line to restore production behavior)
+      // router.push(firebaseConfigured ? '/login' : '/status');
     }
   }, [user, loading, router]);
 

@@ -12,9 +12,6 @@ out
 # Environment variables (NEVER include in image!)
 .env
 .env*.local
-# But allow the docker-specific env file for reference during development
-!.env.example
-!.env.docker
 
 # Git
 .git
@@ -43,6 +40,3 @@ README.md
 **/*.spec.js
 **/*.spec.ts
 coverage
-
-# Backup
-ORIGINAL_BACKUP/

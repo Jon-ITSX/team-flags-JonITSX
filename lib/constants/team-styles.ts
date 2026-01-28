@@ -8,6 +8,7 @@ export interface TeamStyle {
   accentGradient?: string;
   textColor?: string;
   borderColor?: string;
+  backgroundImage?: string;
 }
 
 export const teamStyles: Record<string, TeamStyle> = {
@@ -79,7 +80,8 @@ export const teamStyles: Record<string, TeamStyle> = {
     textColor: "text-green-50",
     borderColor: "border-cyan-400/50",
     pattern: "bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(34,211,238,0.1)_2px,rgba(34,211,238,0.1)_4px)]",
-    icon: "⚡"
+    icon: "⚡",
+    backgroundImage: "/sidestep-logo.png"
   },
   "8": {
     name: "Nissastigen",

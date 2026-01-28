@@ -13,7 +13,6 @@ const firebaseConfig = {
 // Singleton pattern - prevent multiple initializations
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
-let isFirebaseConfigured = false;
 
 // Initialize immediately if on client-side
 if (typeof window !== 'undefined') {
@@ -22,49 +21,24 @@ if (typeof window !== 'undefined') {
     try {
       app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
       auth = getAuth(app);
-      isFirebaseConfigured = true;
-      console.log('✓ Firebase initialized successfully');
     } catch (error) {
-      console.error('✗ Firebase initialization error:', error);
-      isFirebaseConfigured = false;
+      console.error('Firebase initialization error:', error);
     }
   } else {
     console.log('ℹ️ Firebase credentials not configured. Authentication features disabled.');
-    console.log('   Set NEXT_PUBLIC_FIREBASE_API_KEY and NEXT_PUBLIC_FIREBASE_PROJECT_ID to enable.');
+    console.log('📚 This is OK for Week 2! Focus on Docker concepts.');
   }
 }
 
 // Ensure auth is always defined for TypeScript
 export { app, auth as authInstance };
 
-/**
- * Get Firebase Auth instance with helpful error messages
- * @throws Error if Firebase is not initialized
- */
+// Helper to get auth with runtime check
 export function getAuthInstance(): Auth {
   if (!auth) {
-    throw new Error(
-      'Firebase Auth is not initialized.\n' +
-      'This can happen if:\n' +
-      '  1. You are not calling this from client-side code\n' +
-      '  2. Firebase credentials are not configured\n' +
-      'Required environment variables:\n' +
-      '  - NEXT_PUBLIC_FIREBASE_API_KEY\n' +
-      '  - NEXT_PUBLIC_FIREBASE_PROJECT_ID\n' +
-      '  - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN\n' +
-      '  - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET\n' +
-      '  - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID\n' +
-      '  - NEXT_PUBLIC_FIREBASE_APP_ID'
-    );
+    throw new Error('Firebase Auth is not initialized. Make sure this is running on the client side.');
   }
   return auth;
-}
-
-/**
- * Check if Firebase is configured and ready to use
- */
-export function isFirebaseInitialized(): boolean {
-  return isFirebaseConfigured && auth !== undefined;
 }
 
 // Keep backwards compatibility

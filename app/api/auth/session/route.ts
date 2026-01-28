@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
 
 const SESSION_COOKIE_NAME = 'session';
 const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 5; // 5 days in seconds
 
-// POST - Create session cookie from Firebase ID token
+/**
+ * POST /api/auth/session
+ * Create a session cookie from Firebase ID token
+ */
 export async function POST(request: NextRequest) {
   try {
     const { idToken } = await request.json();
@@ -14,38 +17,59 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing idToken' }, { status: 400 });
     }
 
-    // Verify the ID token and create a session cookie
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    try {
+      // Get Firebase Admin Auth instance
+      const adminAuth = getAdminAuth();
 
-    // Create session cookie with 5 day expiration
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
-      expiresIn: SESSION_COOKIE_MAX_AGE * 1000, // milliseconds
-    });
+      // Verify the ID token and create a session cookie
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
 
-    // Set the cookie
-    const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE_NAME, sessionCookie, {
-      maxAge: SESSION_COOKIE_MAX_AGE,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
+      // Create session cookie with 5 day expiration
+      const sessionCookie = await adminAuth.createSessionCookie(idToken, {
+        expiresIn: SESSION_COOKIE_MAX_AGE * 1000, // milliseconds
+      });
 
-    return NextResponse.json({
-      success: true,
-      email: decodedToken.email,
-    });
+      // Set the cookie
+      const cookieStore = await cookies();
+      cookieStore.set(SESSION_COOKIE_NAME, sessionCookie, {
+        maxAge: SESSION_COOKIE_MAX_AGE,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+      });
+
+      return NextResponse.json({
+        success: true,
+        email: decodedToken.email,
+      });
+    } catch (firebaseError) {
+      const errorMessage = firebaseError instanceof Error ? firebaseError.message : 'Unknown error';
+      console.error('✗ Firebase error:', errorMessage);
+      
+      return NextResponse.json(
+        {
+          error: 'Authentication failed',
+          details: 'Firebase Admin SDK not configured. Contact administrator.',
+        },
+        { status: 503 }
+      );
+    }
   } catch (error) {
-    console.error('Session creation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('✗ Session creation error:', errorMessage);
+    
     return NextResponse.json(
-      { error: 'Failed to create session' },
+      { error: 'Session creation failed', details: errorMessage },
       { status: 500 }
     );
   }
 }
 
-// DELETE - Clear session cookie (logout)
+/**
+ * DELETE /api/auth/session
+ * Clear session cookie (logout)
+ */
 export async function DELETE() {
   try {
     const cookieStore = await cookies();
@@ -53,9 +77,11 @@ export async function DELETE() {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Session deletion error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('✗ Session deletion error:', errorMessage);
+    
     return NextResponse.json(
-      { error: 'Failed to delete session' },
+      { error: 'Failed to delete session', details: errorMessage },
       { status: 500 }
     );
   }

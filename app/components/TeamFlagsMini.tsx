@@ -33,7 +33,12 @@ export default function TeamFlagsMini() {
               <div className={cn(
                 "absolute inset-0 bg-gradient-to-br",
                 style.gradient
-              )} />
+              )}
+              style={style.backgroundImage ? {
+                backgroundImage: `url(${style.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              } : undefined} />
 
               {/* Pattern Overlay */}
               <div className={cn(
